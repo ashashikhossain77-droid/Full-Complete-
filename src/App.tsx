@@ -79,6 +79,7 @@ export default function App() {
   const [selectedLineNo, setSelectedLineNo] = useState<string>('18');
   const [selectedChecklistDate, setSelectedChecklistDate] = useState<string>(DEBONAIR_SEPTEMBER_21_DATE);
   const [activeDate, setActiveDate] = useState<string>(DEBONAIR_SEPTEMBER_21_DATE);
+  const [activeFloor, setActiveFloor] = useState<string>('all');
   const [activeDataset, setActiveDataset] = useState<string>('debonair_sep21');
 
   // Save Status Indicator for Header ('idle' | 'saving' | 'saved')
@@ -1157,6 +1158,8 @@ export default function App() {
         saveStatus={saveStatus}
         activeDate={activeDate}
         onSelectDate={handleSelectDate}
+        activeFloor={activeFloor}
+        onSelectFloor={setActiveFloor}
         onOpenRoles={() => handleOpenUserModal('roles')}
         onOpenChat={() => setIsChatOpen(true)}
         profile={profile}
@@ -1325,6 +1328,8 @@ export default function App() {
             todayDate={activeDate || todayStr}
             activeDate={activeDate}
             onSelectDate={handleSelectDate}
+            activeFloor={activeFloor}
+            onSelectFloor={setActiveFloor}
             checklists={checklists}
             profile={profile}
             onNavigate={handleNavigate}

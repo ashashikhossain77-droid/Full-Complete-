@@ -42,6 +42,7 @@ import { DailyProductivityInsights } from './DailyProductivityInsights';
 import { MorningHuddleTimer } from './MorningHuddleTimer';
 import { QuickReportsWidget } from './QuickReportsWidget';
 import { CustomDateSelector } from './CustomDateSelector';
+import { ProductionFloorDropdown, matchesProductionFloor } from './ProductionFloorSelector';
 import { ROLE_TIERS, normalizeChecklistStatuses, CHECKLIST_TASK_COUNT } from '../mockData';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -1847,6 +1848,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-xs text-[#527078] font-mono-numbers">
                 Total Target: <strong className="text-[#17343a]">{factory.totalTargetProd.toLocaleString()} pcs</strong> • Output: <strong className="text-[#17343a]">{factory.totalAchievedProd.toLocaleString()} pcs</strong>
               </div>
+              <ProductionFloorDropdown
+                selectedFloor={selectedDashboardFloor}
+                onSelectFloor={(id) => setSelectedDashboardFloor(id)}
+                variant="button"
+              />
               <button
                 type="button"
                 id="open-floor-plan-map-btn"
@@ -2140,7 +2146,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
             {(selectedDashboardFloor === 'all'
               ? lines
-              : lines.filter(l => l.floor === selectedDashboardFloor)
+              : lines.filter(l => matchesProductionFloor(l.floor, selectedDashboardFloor))
             ).map(line => (
               <div
                 key={line.id}
@@ -2232,7 +2238,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
               {(selectedDashboardFloor === 'all'
                 ? lines
-                : lines.filter(l => l.floor === selectedDashboardFloor)
+                : lines.filter(l => matchesProductionFloor(l.floor, selectedDashboardFloor))
               ).map(line => (
                 <div
                   key={line.id}

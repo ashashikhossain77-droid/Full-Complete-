@@ -31,6 +31,11 @@ import { LineEntry, UserProfile, ChecklistMap } from '../types';
 import { CustomDateSelector } from './CustomDateSelector';
 import { ImportPrintExportModal } from './ImportPrintExportModal';
 import {
+  ProductionFloorDropdown,
+  matchesProductionFloor,
+  getProductionFloorLabel
+} from './ProductionFloorSelector';
+import {
   calculateLineMetrics,
   calculateFactoryOverall,
   calculateStyleWipThreshold,
@@ -48,6 +53,8 @@ interface ReportsProps {
   todayDate: string;
   activeDate?: string;
   onSelectDate?: (date: string) => void;
+  activeFloor?: string;
+  onSelectFloor?: (floorId: string, floorLabel: string) => void;
   checklists?: ChecklistMap;
   profile: UserProfile;
   onNavigate?: (tab: string, lineNo?: string) => void;
@@ -61,6 +68,8 @@ export const Reports: React.FC<ReportsProps> = ({
   todayDate,
   activeDate,
   onSelectDate,
+  activeFloor = 'all',
+  onSelectFloor,
   checklists,
   profile,
   onNavigate,
@@ -68,7 +77,7 @@ export const Reports: React.FC<ReportsProps> = ({
   onOpenDatabase
 }) => {
   const [reportDate, setReportDate] = useState(activeDate || todayDate);
-  const [floorFilter, setFloorFilter] = useState('all');
+  const [floorFilter, setFloorFilter] = useState(activeFloor || 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [reportView, setReportView] = useState<'all' | 'day_wise' | 'summaries' | 'matrix'>('all');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -79,6 +88,13 @@ export const Reports: React.FC<ReportsProps> = ({
       setReportDate(activeDate);
     }
   }, [activeDate]);
+
+  // Keep floorFilter synchronized when activeFloor is updated globally
+  React.useEffect(() => {
+    if (activeFloor) {
+      setFloorFilter(activeFloor);
+    }
+  }, [activeFloor]);
 
   // Lines specific to the selected report date
   const reportLines = useMemo(() => {
@@ -100,7 +116,7 @@ export const Reports: React.FC<ReportsProps> = ({
   // Filtered Lines for the Detailed Matrix
   const filteredLines = useMemo(() => {
     return reportLines.filter(l => {
-      const matchFloor = floorFilter === 'all' || l.floor.toLowerCase().includes(floorFilter.toLowerCase());
+      const matchFloor = floorFilter === 'all' || matchesProductionFloor(l.floor, floorFilter);
       const matchSearch =
         !searchQuery ||
         l.style.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -318,22 +334,14 @@ export const Reports: React.FC<ReportsProps> = ({
               compact={false}
             />
 
-            <div className="flex items-center gap-2 bg-[#f1eee6] px-3 py-1.5 rounded-xl border border-[#d9d2c2]">
-              <Filter className="w-3.5 h-3.5 text-[#176f78]" />
-              <select
-                id="select-floor-filter"
-                value={floorFilter}
-                onChange={e => setFloorFilter(e.target.value)}
-                className="bg-transparent font-bold text-[#17343a] focus:outline-hidden cursor-pointer"
-              >
-                <option value="all">All Sewing Floors ({lines.length} Lines)</option>
-                {floorSummaries.map(fs => (
-                  <option key={fs.floor} value={fs.floor}>
-                    {fs.floor} ({fs.linesCount} Lines)
-                  </option>
-                ))}
-              </select>
-            </div>
+            <ProductionFloorDropdown
+              selectedFloor={floorFilter}
+              onSelectFloor={(id, label) => {
+                setFloorFilter(id);
+                if (onSelectFloor) onSelectFloor(id, label);
+              }}
+              variant="filter"
+            />
 
             <div className="flex items-center gap-2 bg-[#f1eee6] px-3 py-1.5 rounded-xl border border-[#d9d2c2]">
               <Search className="w-3.5 h-3.5 text-[#527078]" />

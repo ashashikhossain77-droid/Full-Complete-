@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { LineEntry, StyleNature, SMVWeight, LearningCurveDayRecord, BalancingLossAnalysis, BuildUpCurve } from '../types';
 import { calculateLineMetrics } from '../utils';
+import { ProductionFloorDropdown, matchesProductionFloor } from './ProductionFloorSelector';
 import {
   getSMVWeight,
   getProgressionTargetEff,
@@ -187,7 +188,7 @@ export const LineData: React.FC<LineDataProps> = ({
       if (dateMatches.length > 0) result = dateMatches;
     }
     if (selectedFloorFilter && selectedFloorFilter !== 'all') {
-      const floorMatches = result.filter(l => (l.floor || '').trim().toLowerCase() === selectedFloorFilter.trim().toLowerCase());
+      const floorMatches = result.filter(l => matchesProductionFloor(l.floor, selectedFloorFilter));
       if (floorMatches.length > 0) result = floorMatches;
     }
     return result;
@@ -778,6 +779,14 @@ export const LineData: React.FC<LineDataProps> = ({
               >
                 All ({lines.length})
               </button>
+
+              <div className="ml-1">
+                <ProductionFloorDropdown
+                  selectedFloor={selectedFloorFilter}
+                  onSelectFloor={(id) => setSelectedFloorFilter(id)}
+                  variant="filter"
+                />
+              </div>
             </div>
 
             {/* Quick Line Selector Row */}

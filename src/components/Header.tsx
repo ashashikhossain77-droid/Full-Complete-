@@ -7,6 +7,7 @@ import React from 'react';
 import { Bell, Sun, Moon, Gauge, Award, CheckCircle2, Loader2, Check, ShieldCheck, Sparkles, User, Upload, MessageSquare, Lock } from 'lucide-react';
 import { SaveStatus, UserProfile, LineEntry } from '../types';
 import { CustomDateSelector } from './CustomDateSelector';
+import { ProductionFloorDropdown } from './ProductionFloorSelector';
 
 interface HeaderProps {
   theme: string;
@@ -22,6 +23,8 @@ interface HeaderProps {
   saveStatus?: SaveStatus;
   activeDate?: string;
   onSelectDate?: (date: string) => void;
+  activeFloor?: string;
+  onSelectFloor?: (floorId: string, floorLabel: string) => void;
   onOpenRoles?: () => void;
   onOpenChat?: () => void;
   profile?: UserProfile;
@@ -43,6 +46,8 @@ export const Header: React.FC<HeaderProps> = ({
   saveStatus = 'idle',
   activeDate,
   onSelectDate,
+  activeFloor = 'all',
+  onSelectFloor,
   onOpenRoles,
   onOpenChat,
   profile,
@@ -93,9 +98,9 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
 
-          {/* Center: Active Production Date Selector */}
-          {onSelectDate && (
-            <div id="top-date-selector-wrapper" className="hidden sm:flex items-center">
+          {/* Center: Active Production Date & Floor Selector */}
+          <div id="top-date-selector-wrapper" className="hidden sm:flex items-center gap-2">
+            {onSelectDate && (
               <CustomDateSelector
                 selectedDate={activeDate || '2026-09-21'}
                 onSelectDate={onSelectDate}
@@ -103,8 +108,15 @@ export const Header: React.FC<HeaderProps> = ({
                 onInitializeDateLines={onInitializeDateLines}
                 compact={true}
               />
-            </div>
-          )}
+            )}
+            {onSelectFloor && (
+              <ProductionFloorDropdown
+                selectedFloor={activeFloor}
+                onSelectFloor={onSelectFloor}
+                variant="header"
+              />
+            )}
+          </div>
 
           {/* Center-Right: Live Status Indicator */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
