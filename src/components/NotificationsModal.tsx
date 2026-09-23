@@ -16,7 +16,9 @@ import {
   Layers, 
   FileSpreadsheet,
   Activity,
-  Zap
+  Zap,
+  CheckCheck,
+  Check
 } from 'lucide-react';
 import { NotificationItem } from '../types';
 
@@ -25,6 +27,7 @@ interface NotificationsModalProps {
   onClose: () => void;
   notifications: NotificationItem[];
   onMarkAsRead: (id: string) => void;
+  onMarkAllAsRead?: () => void;
   onClearAll: () => void;
   onNavigate?: (tab: string, lineNo?: string) => void;
 }
@@ -34,10 +37,13 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
   onClose,
   notifications,
   onMarkAsRead,
+  onMarkAllAsRead,
   onClearAll,
   onNavigate
 }) => {
   if (!isOpen) return null;
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const urgentCount = notifications.filter(
     n => !n.read && (
@@ -47,6 +53,16 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
       n.title.toLowerCase().includes('bottleneck')
     )
   ).length;
+
+  const handleBulkResolve = () => {
+    if (onMarkAllAsRead) {
+      onMarkAllAsRead();
+    } else {
+      notifications.forEach(n => {
+        if (!n.read) onMarkAsRead(n.id);
+      });
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
@@ -71,10 +87,40 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
           <button
             onClick={onClose}
             className="p-1 rounded-xl hover:bg-[#e7e1d5] text-slate-500 cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Quick action toolbar with Bulk Resolve */}
+        {notifications.length > 0 && (
+          <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-[#f1eee6]/80 border border-[#e7e1d5] text-xs gap-3">
+            <div className="text-[11px] text-[#527078]">
+              {unreadCount === 0 ? (
+                <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+                  <Check className="w-3.5 h-3.5" /> All alerts marked as resolved
+                </span>
+              ) : (
+                <span>
+                  <strong className="text-[#17343a] font-mono-numbers">{unreadCount}</strong> unread {unreadCount === 1 ? 'alert' : 'alerts'} pending review
+                </span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              id="notifications-bulk-resolve-btn"
+              onClick={handleBulkResolve}
+              disabled={unreadCount === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#176f78] hover:bg-[#12555c] active:scale-95 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0"
+              title="Mark all active alerts as read in a single action"
+            >
+              <CheckCheck className="w-3.5 h-3.5" />
+              <span>Bulk Resolve{unreadCount > 0 ? ` (${unreadCount})` : ''}</span>
+            </button>
+          </div>
+        )}
 
         <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
           {notifications.length === 0 ? (
@@ -262,20 +308,36 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
           )}
         </div>
 
-        <div className="flex justify-between items-center pt-3 border-t border-[#e7e1d5]">
+        <div className="flex justify-between items-center pt-3 border-t border-[#e7e1d5] gap-2 flex-wrap">
           <button
+            type="button"
             onClick={onClearAll}
-            className="flex items-center gap-1 text-xs text-rose-600 hover:underline font-bold cursor-pointer"
+            disabled={notifications.length === 0}
+            className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 hover:underline font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Clear All</span>
           </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#176f78] text-white text-xs font-bold hover:bg-[#12555c] cursor-pointer"
-          >
-            Done
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              id="notifications-bulk-resolve-footer-btn"
+              onClick={handleBulkResolve}
+              disabled={unreadCount === 0}
+              className="px-3 py-1.5 rounded-xl border border-[#176f78] text-[#176f78] hover:bg-[#176f78]/10 text-xs font-bold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+              title="Mark all alerts as read"
+            >
+              <CheckCheck className="w-3.5 h-3.5" />
+              <span>Bulk Resolve</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 rounded-xl bg-[#176f78] text-white text-xs font-bold hover:bg-[#12555c] transition-colors cursor-pointer shadow-2xs"
+            >
+              Done
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>

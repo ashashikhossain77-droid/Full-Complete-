@@ -933,6 +933,10 @@ export default function App() {
     );
   };
 
+  const handleMarkAllNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
   const handleClearNotifications = () => {
     setNotifications([]);
   };
@@ -1396,6 +1400,7 @@ export default function App() {
         onClose={() => setIsNotificationsOpen(false)}
         notifications={notifications}
         onMarkAsRead={handleMarkNotificationRead}
+        onMarkAllAsRead={handleMarkAllNotificationsRead}
         onClearAll={handleClearNotifications}
         onNavigate={(tab, lineNo) => {
           setIsNotificationsOpen(false);
