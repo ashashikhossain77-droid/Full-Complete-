@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* ==========================================================================
+   CSS Variables & Color Schemes
+   ========================================================================== */
+:root,
+[data-theme="light"] {
+  --background: 45 25% 97%; /* #fbfaf6 */
+  --foreground: 190 43% 16%; /* #17343a */
+  --card: 0 0% 100%;
+  --card-foreground: 190 43% 16%;
+  --primary: 186 68% 28%; /* #176f78 */
+  --primary-foreground: 0 0% 100%;
+  --muted: 40 20% 93%; /* #f1eee6 */
+  --muted-foreground: 192 19% 39%; /* #527078 */
+  --border: 42 20% 80%; /* #d9d2c2 */
+  --accent: 186 68% 28%;
+  --accent-foreground: 0 0% 100%;
+}
+
+[data-theme="dark"],
+.dark {
+  --background: 204 35% 8%; /* #0d1418 */
+  --foreground: 210 25% 92%; /* #e2e8f0 */
+  --card: 204 28% 13%; /* #152028 */
+  --card-foreground: 210 25% 94%;
+  --primary: 185 65% 42%; /* #26a2af */
+  --primary-foreground: 204 35% 8%;
+  --muted: 204 25% 18%; /* #1d2b35 */
+  --muted-foreground: 215 16% 65%; /* #94a3b8 */
+  --border: 204 22% 23%; /* #263845 */
+  --accent: 185 65% 42%;
+  --accent-foreground: 204 35% 8%;
+}
+
+[data-theme="forest"] {
+  --background: 140 25% 96%;
+  --foreground: 155 50% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 155 50% 12%;
+  --primary: 154 60% 25%;
+  --primary-foreground: 0 0% 100%;
+  --border: 145 20% 80%;
+  --muted: 140 20% 92%;
+  --muted-foreground: 155 30% 35%;
+  --accent: 154 60% 25%;
+  --accent-foreground: 0 0% 100%;
+}
+
+[data-theme="sunset"] {
+  --background: 38 40% 97%;
+  --foreground: 24 50% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 24 50% 16%;
+  --primary: 32 85% 38%;
+  --primary-foreground: 0 0% 100%;
+  --border: 35 30% 82%;
+  --muted: 38 30% 93%;
+  --muted-foreground: 28 25% 40%;
+  --accent: 32 85% 38%;
+  --accent-foreground: 0 0% 100%;
+}
+
+[data-theme="industrial"] {
+  --background: 210 20% 95%;
+  --foreground: 215 25% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 25% 15%;
+  --primary: 215 35% 32%;
+  --primary-foreground: 0 0% 100%;
+  --border: 215 18% 78%;
+  --muted: 210 18% 90%;
+  --muted-foreground: 215 15% 42%;
+  --accent: 215 35% 32%;
+  --accent-foreground: 0 0% 100%;
+}
+
+/* ==========================================================================
+   Smooth Theme Cross-Fade Transition Animations
+   ========================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: theme-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: theme-fade-in;
+}
+
+@keyframes theme-fade-out {
+  from { opacity: 1; filter: brightness(1); }
+  to { opacity: 0; filter: brightness(0.96); }
+}
+
+@keyframes theme-fade-in {
+  from { opacity: 0; filter: brightness(1.04); }
+  to { opacity: 1; filter: brightness(1); }
+}
+
+/* Applied during programmatic theme switch */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 450ms cubic-bezier(0.4, 0, 0.2, 1),
+              color 350ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 450ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 450ms cubic-bezier(0.4, 0, 0.2, 1),
+              fill 350ms cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 350ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-delay: 0s !important;
+}
+
+/* ==========================================================================
+   Comprehensive Dark Mode Palette Overrides
+   ========================================================================== */
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+  background-color: #0d1418;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .cockpit-shell {
+  background-color: #0d1418 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] header.cockpit-header,
+[data-theme="dark"] nav.cockpit-nav,
+[data-theme="dark"] .cockpit-drawer {
+  background-color: #121d24f2 !important;
+  border-color: #243542 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: #16222a !important;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .bg-\[\#fbfaf6\],
+[data-theme="dark"] .bg-\[\#f5f3ec\],
+[data-theme="dark"] .bg-\[\#f1eee6\] {
+  background-color: #141f27 !important;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .text-\[\#17343a\] {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .text-\[\#527078\] {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .border-\[\#d9d2c2\],
+[data-theme="dark"] .border-\[\#e7e1d5\] {
+  border-color: #263845 !important;
+}
+
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: #101920 !important;
+  color: #f1f5f9 !important;
+  border-color: #2b3d4b !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* ==========================================================================
+   Mobile UX Polish & Touch Targets
+   ========================================================================== */
+@media (max-width: 640px) {
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 40px;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.55);
+}
+
