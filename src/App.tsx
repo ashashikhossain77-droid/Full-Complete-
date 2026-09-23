@@ -1329,6 +1329,8 @@ export default function App() {
             profile={profile}
             onNavigate={handleNavigate}
             onDeleteFloor={handleDeleteFloor}
+            onImportLines={handleImportLines}
+            onOpenDatabase={handleOpenDatabase}
           />
         )}
       </main>

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { LineEntry, UserProfile, ChecklistMap } from '../types';
 import { CustomDateSelector } from './CustomDateSelector';
+import { ImportPrintExportModal } from './ImportPrintExportModal';
 import {
   calculateLineMetrics,
   calculateFactoryOverall,
@@ -51,6 +52,8 @@ interface ReportsProps {
   profile: UserProfile;
   onNavigate?: (tab: string, lineNo?: string) => void;
   onDeleteFloor?: (floorName: string, mode: 'delete_all_lines' | 'reassign', targetFloor?: string) => void;
+  onImportLines?: (importedLines: LineEntry[], mode?: 'upsert' | 'append' | 'replace') => void;
+  onOpenDatabase?: (tab?: 'backup' | 'csv-import') => void;
 }
 
 export const Reports: React.FC<ReportsProps> = ({
@@ -60,12 +63,15 @@ export const Reports: React.FC<ReportsProps> = ({
   onSelectDate,
   checklists,
   profile,
-  onNavigate
+  onNavigate,
+  onImportLines,
+  onOpenDatabase
 }) => {
   const [reportDate, setReportDate] = useState(activeDate || todayDate);
   const [floorFilter, setFloorFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [reportView, setReportView] = useState<'all' | 'day_wise' | 'summaries' | 'matrix'>('all');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Keep reportDate synchronized when activeDate is updated globally
   React.useEffect(() => {
@@ -216,19 +222,31 @@ export const Reports: React.FC<ReportsProps> = ({
 
           <div className="flex items-center gap-2.5 flex-wrap">
             <button
+              id="btn-import-print-export-report"
+              type="button"
+              onClick={() => setIsReportModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#176f78] text-white hover:bg-[#12555c] active:scale-95 transition-all text-xs font-bold shadow-2xs cursor-pointer group"
+              title="Generate summarized PDF, Print, or Import/Export reports for the selected date"
+            >
+              <FileSpreadsheet className="w-4 h-4 transition-transform group-hover:scale-110" />
+              <span>Import/Print/Export Report</span>
+            </button>
+            <button
               id="btn-export-csv"
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#176f78] text-white hover:bg-[#12555c] transition-colors text-xs font-bold shadow-2xs cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#f1eee6] border border-[#d9d2c2] text-[#17343a] hover:bg-[#e7e1d5] transition-colors text-xs font-bold cursor-pointer"
+              title="Export CSV data for selected date"
             >
-              <Download className="w-4 h-4" />
-              <span>Export CSV (With Summaries)</span>
+              <Download className="w-4 h-4 text-[#176f78]" />
+              <span>Export CSV</span>
             </button>
             <button
               id="btn-print-report"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#f1eee6] border border-[#d9d2c2] text-[#17343a] hover:bg-[#e7e1d5] transition-colors text-xs font-bold cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#f1eee6] border border-[#d9d2c2] text-[#17343a] hover:bg-[#e7e1d5] transition-colors text-xs font-bold cursor-pointer"
+              title="Print browser view"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-4 h-4 text-[#176f78]" />
               <span>Print Sheet</span>
             </button>
           </div>
@@ -1247,6 +1265,21 @@ export const Reports: React.FC<ReportsProps> = ({
           </div>
         </div>
       )}
+
+      {/* Import / Print / Export Modal Hub */}
+      <ImportPrintExportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        lines={lines}
+        reportDate={reportDate}
+        onSelectDate={date => {
+          setReportDate(date);
+          if (onSelectDate) onSelectDate(date);
+        }}
+        profile={profile}
+        onImportLines={onImportLines}
+        onOpenDatabase={onOpenDatabase}
+      />
     </div>
   );
 };
