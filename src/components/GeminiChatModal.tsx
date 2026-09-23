@@ -56,7 +56,7 @@ const ROLE_CONFIGS: Record<
 > = {
   general: {
     name: 'IE Productivity Advisor',
-    model: 'gemini-3.5-flash',
+    model: 'gemini-3.8-flash',
     desc: 'General line productivity, 5S standards, SAM targets & factory workflow',
     icon: Bot,
     accentColor: '#176f78',

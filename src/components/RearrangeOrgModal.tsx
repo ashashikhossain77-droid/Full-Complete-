@@ -45,7 +45,7 @@ export const RearrangeOrgModal: React.FC<RearrangeOrgModalProps> = ({
   const [transferMemberId, setTransferMemberId] = useState<string>('');
   const [targetInchargeId, setTargetInchargeId] = useState<string>('');
 
-  const [notification, setNotification] = useState<{ text: string; type: 'success' | 'info' } | null>(
+  const [notification, setNotification] = useState<{ text: string; type: 'success' | 'info' | 'error' } | null>(
     null
   );
 
@@ -90,7 +90,10 @@ export const RearrangeOrgModal: React.FC<RearrangeOrgModalProps> = ({
   // Handle Swap Execution
   const handleExecuteSwap = () => {
     if (!memberAId || !memberBId || memberAId === memberBId) {
-      alert('Please select two distinct Line IEs to swap.');
+      setNotification({
+        text: 'Please select two distinct Line IEs to swap.',
+        type: 'error'
+      });
       return;
     }
 
@@ -157,7 +160,10 @@ export const RearrangeOrgModal: React.FC<RearrangeOrgModalProps> = ({
 
     if (!source || !target) return;
     if (source.inc.id === target.inc.id) {
-      alert('The engineer is already assigned to this Incharge & Floor.');
+      setNotification({
+        text: 'The engineer is already assigned to this Incharge & Floor.',
+        type: 'error'
+      });
       return;
     }
 
@@ -293,15 +299,29 @@ export const RearrangeOrgModal: React.FC<RearrangeOrgModalProps> = ({
 
         {/* Notification Banner */}
         {notification && (
-          <div className="px-6 py-2.5 bg-emerald-50 border-b border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between">
+          <div
+            className={`px-6 py-2.5 border-b text-xs font-semibold flex items-center justify-between ${
+              notification.type === 'error'
+                ? 'bg-rose-50 border-rose-200 text-rose-800'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            }`}
+          >
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2
+                className={`w-4 h-4 shrink-0 ${
+                  notification.type === 'error' ? 'text-rose-600' : 'text-emerald-600'
+                }`}
+              />
               <span>{notification.text}</span>
             </div>
             <button
               type="button"
               onClick={() => setNotification(null)}
-              className="text-emerald-700 hover:text-emerald-900 text-xs font-bold"
+              className={`text-xs font-bold ${
+                notification.type === 'error'
+                  ? 'text-rose-700 hover:text-rose-900'
+                  : 'text-emerald-700 hover:text-emerald-900'
+              }`}
             >
               Dismiss
             </button>

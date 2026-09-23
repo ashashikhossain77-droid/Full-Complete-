@@ -24,6 +24,8 @@ import { NotificationsModal } from './components/NotificationsModal';
 import { DatabaseModal } from './components/DatabaseModal';
 import { PerformanceScorecardModal } from './components/PerformanceScorecardModal';
 import { UserChatHubModal } from './components/UserChatHubModal';
+import { PrivacySecurityModal } from './components/PrivacySecurityModal';
+import { TerminalLockScreen } from './components/TerminalLockScreen';
 import { initAuth } from './lib/firebaseAuth';
 import { Sparkles, Bot, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -40,7 +42,9 @@ import {
   NotificationItem,
   SyncState,
   ThemeType,
-  SaveStatus
+  SaveStatus,
+  PrivacySecuritySettings,
+  SecurityAuditEntry
 } from './types';
 import {
   ALL_IMPORTED_DEBONAIR_LINES,
@@ -260,6 +264,132 @@ export default function App() {
   const [databaseInitialTab, setDatabaseInitialTab] = useState<'backup' | 'csv-import'>('backup');
   const [isScorecardOpen, setIsScorecardOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isPrivacySecurityOpen, setIsPrivacySecurityOpen] = useState(false);
+
+  // Privacy & Security Controls
+  const [privacySettings, setPrivacySettings] = useState<PrivacySecuritySettings>(() => {
+    try {
+      const saved = localStorage.getItem('ie_privacy_security_settings');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      privacyModeEnabled: false,
+      blurSensitiveProductionFigures: false,
+      autoLockMinutes: 15,
+      pinLockEnabled: true,
+      pinCode: '1234',
+      isLocked: false,
+      dataEncryptionNoticeAcknowledged: true
+    };
+  });
+
+  const [securityAuditTrail, setSecurityAuditTrail] = useState<SecurityAuditEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('ie_security_audit_trail');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [
+      {
+        id: 'audit-init-1',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        action: 'System Boot & Telemetry',
+        details: 'IE Operational Cockpit initialized with factory local state encryption.',
+        severity: 'info',
+        user: 'Lead IE'
+      },
+      {
+        id: 'audit-init-2',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        action: 'Floor Telemetry Handshake',
+        details: 'Debonair Unit-02 line registry verified with zero anomalies.',
+        severity: 'info',
+        user: 'System'
+      }
+    ];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ie_privacy_security_settings', JSON.stringify(privacySettings));
+    } catch {}
+  }, [privacySettings]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ie_security_audit_trail', JSON.stringify(securityAuditTrail));
+    } catch {}
+  }, [securityAuditTrail]);
+
+  // Terminal Lockout Handlers
+  const handleLockTerminal = () => {
+    setPrivacySettings(prev => ({ ...prev, isLocked: true }));
+    setSecurityAuditTrail(prev => [
+      {
+        id: `audit-lock-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        action: 'Manual Terminal Lockout',
+        details: 'User initiated quick security lockout on shop floor terminal.',
+        severity: 'security',
+        user: profile.name || 'Lead IE'
+      },
+      ...prev.slice(0, 49)
+    ]);
+  };
+
+  const handleUnlockTerminal = () => {
+    setPrivacySettings(prev => ({ ...prev, isLocked: false }));
+    setSecurityAuditTrail(prev => [
+      {
+        id: `audit-unlock-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        action: 'Terminal Unlocked',
+        details: 'PIN verification successful. Workstation access resumed.',
+        severity: 'info',
+        user: profile.name || 'Lead IE'
+      },
+      ...prev.slice(0, 49)
+    ]);
+  };
+
+  const handleClearCache = () => {
+    localStorage.removeItem('ie_dashboard_lines');
+    localStorage.removeItem('ie_daily_checklists');
+    localStorage.removeItem('ie_floor_todos');
+    window.location.reload();
+  };
+
+  // Auto-lock inactivity listener
+  useEffect(() => {
+    if (privacySettings.autoLockMinutes <= 0 || privacySettings.isLocked) return;
+
+    let timeoutId: NodeJS.Timeout;
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setPrivacySettings(prev => ({ ...prev, isLocked: true }));
+        setSecurityAuditTrail(prev => [
+          {
+            id: `audit-autolock-${Date.now()}`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            action: 'Inactivity Auto-Lock',
+            details: `Workstation locked after ${privacySettings.autoLockMinutes} minutes of inactivity.`,
+            severity: 'security',
+            user: profile.name || 'Engineer'
+          },
+          ...prev.slice(0, 49)
+        ]);
+      }, privacySettings.autoLockMinutes * 60 * 1000);
+    };
+
+    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+    events.forEach(e => window.addEventListener(e, resetTimer, { passive: true }));
+    resetTimer();
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+    };
+  }, [privacySettings.autoLockMinutes, privacySettings.isLocked, profile.name]);
 
   // Auto-sync authenticated Google user identity with active profile
   useEffect(() => {
@@ -996,7 +1126,11 @@ export default function App() {
   };
 
   return (
-    <div className="cockpit-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] text-[hsl(var(--foreground))] antialiased transition-colors duration-300">
+    <div
+      data-theme={theme}
+      data-privacy-shield={privacySettings.privacyModeEnabled || privacySettings.blurSensitiveProductionFigures}
+      className="cockpit-shell min-h-[100dvh] flex flex-col bg-[hsl(var(--background))] text-[hsl(var(--foreground))] antialiased transition-colors duration-300"
+    >
       <motion.div
         key={theme}
         initial={{ opacity: 0.85 }}
@@ -1026,6 +1160,7 @@ export default function App() {
         onOpenDatabase={handleOpenDatabase}
         lines={lines}
         onInitializeDateLines={handleInitializeDateLines}
+        onLockTerminal={handleLockTerminal}
       />
 
       {/* Main Content Area: Responsive padding with safe-area spacing for mobile bottom navigation */}
@@ -1241,6 +1376,7 @@ export default function App() {
         onUpdateLayout={setLayout}
         auditoryAlertsEnabled={auditoryAlertsEnabled}
         onToggleAuditoryAlerts={setAuditoryAlertsEnabled}
+        onOpenPrivacySecurity={() => setIsPrivacySecurityOpen(true)}
       />
 
       <UserModal
@@ -1251,6 +1387,8 @@ export default function App() {
         roleTiers={roleTiers}
         onUpdateRoleTiers={handleUpdateRoleTiers}
         initialTab={userModalTab}
+        onLockTerminal={handleLockTerminal}
+        onOpenPrivacySecurity={() => setIsPrivacySecurityOpen(true)}
       />
 
       <NotificationsModal
@@ -1315,6 +1453,26 @@ export default function App() {
         onClose={() => setIsChatOpen(false)}
         profile={profile}
         lines={lines}
+      />
+
+      {/* Enterprise Privacy & Security Controls Modal */}
+      <PrivacySecurityModal
+        isOpen={isPrivacySecurityOpen}
+        onClose={() => setIsPrivacySecurityOpen(false)}
+        settings={privacySettings}
+        onUpdateSettings={setPrivacySettings}
+        onLockTerminal={handleLockTerminal}
+        auditTrail={securityAuditTrail}
+        onClearCache={handleClearCache}
+        profile={profile}
+      />
+
+      {/* Terminal Workstation Lock Screen */}
+      <TerminalLockScreen
+        isLocked={privacySettings.isLocked}
+        onUnlock={handleUnlockTerminal}
+        pinCode={privacySettings.pinCode}
+        profile={profile}
       />
     </div>
   );

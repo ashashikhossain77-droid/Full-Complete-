@@ -20,7 +20,8 @@ import {
   Copy,
   ExternalLink,
   Globe,
-  CheckCheck
+  CheckCheck,
+  Lock
 } from 'lucide-react';
 import { UserProfile, RoleTier } from '../types';
 import { ROLE_TIERS as DEFAULT_ROLE_TIERS } from '../mockData';
@@ -35,6 +36,8 @@ interface UserModalProps {
   roleTiers?: RoleTier[];
   onUpdateRoleTiers?: (tiers: RoleTier[]) => void;
   initialTab?: 'profile' | 'roles';
+  onLockTerminal?: () => void;
+  onOpenPrivacySecurity?: () => void;
 }
 
 const TIER_TO_ROLE: Record<string, UserProfile['role']> = {
@@ -52,7 +55,9 @@ export const UserModal: React.FC<UserModalProps> = ({
   onUpdateProfile,
   roleTiers = DEFAULT_ROLE_TIERS,
   onUpdateRoleTiers,
-  initialTab = 'profile'
+  initialTab = 'profile',
+  onLockTerminal,
+  onOpenPrivacySecurity
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'roles'>(initialTab);
   const [name, setName] = useState<string>(profile.name);
@@ -587,6 +592,49 @@ export const UserModal: React.FC<UserModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Terminal Lock & Privacy Controls */}
+              {(onLockTerminal || onOpenPrivacySecurity) && (
+                <div className="p-3.5 rounded-2xl bg-[#176f78]/5 border border-[#176f78]/20 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#176f78] text-white flex items-center justify-center shrink-0">
+                      <Shield className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-[#17343a]">Terminal Security &amp; Privacy</div>
+                      <div className="text-[10px] text-[#527078]">Lock workstation or adjust privacy blur shields</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {onLockTerminal && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onLockTerminal();
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                      >
+                        <Lock className="w-3 h-3" />
+                        <span>Lock Now</span>
+                      </button>
+                    )}
+                    {onOpenPrivacySecurity && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenPrivacySecurity();
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-[#176f78] hover:bg-[#12555c] text-white text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                      >
+                        <Shield className="w-3 h-3" />
+                        <span>Security</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Modal Footer */}
               <div className="pt-2 flex items-center justify-end gap-2">

@@ -104,6 +104,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
   const [importMode, setImportMode] = useState<'upsert' | 'append' | 'replace'>('upsert');
   const [copiedTemplate, setCopiedTemplate] = useState(false);
   const [importSuccessMessage, setImportSuccessMessage] = useState<string | null>(null);
+  const [backupNotice, setBackupNotice] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Parse and validate CSV data
   const validationResult: CSVValidationResult = useMemo(() => {
@@ -155,13 +156,15 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
         const parsed = JSON.parse(event.target?.result as string);
         if (parsed.lines && parsed.checklists) {
           onRestoreData(parsed);
-          alert('Database restored successfully from backup file!');
-          onClose();
+          setBackupNotice({ text: 'Database restored successfully from backup file!', type: 'success' });
+          setTimeout(() => {
+            onClose();
+          }, 1200);
         } else {
-          alert('Invalid backup file schema.');
+          setBackupNotice({ text: 'Invalid backup file schema: missing required lines or checklists.', type: 'error' });
         }
       } catch (err) {
-        alert('Failed to parse backup JSON.');
+        setBackupNotice({ text: 'Failed to parse backup JSON: invalid syntax.', type: 'error' });
       }
     };
     reader.readAsText(file);
@@ -288,7 +291,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
     );
 
     if (rowsToImport.length === 0) {
-      alert('No valid line configurations available to import. Please review validation errors.');
+      setFileError('No valid line configurations available to import. Please review validation errors.');
       return;
     }
 
@@ -310,7 +313,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
         `Successfully imported and validated ${importedLineEntries.length} sewing line configurations into the factory registry using "${importMode === 'upsert' ? 'Update & Add' : importMode === 'append' ? 'Append New Only' : 'Replace All'}" strategy.`
       );
     } else {
-      alert(`Imported ${importedLineEntries.length} lines.`);
+      setImportSuccessMessage(`Imported ${importedLineEntries.length} lines.`);
     }
   };
 
@@ -495,6 +498,17 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
             </div>
 
             {/* Action Buttons */}
+            {backupNotice && (
+              <div
+                className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                  backupNotice.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}
+              >
+                <span>{backupNotice.text}</span>
+              </div>
+            )}
             <div className="space-y-2 pt-1">
               <button
                 type="button"

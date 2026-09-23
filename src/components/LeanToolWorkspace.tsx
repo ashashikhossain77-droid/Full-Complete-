@@ -50,6 +50,11 @@ export const LeanToolWorkspace: React.FC<LeanToolWorkspaceProps> = ({
 }) => {
   // Common states
   const [selectedLine, setSelectedLine] = useState('18');
+  const [workspaceToast, setWorkspaceToast] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setWorkspaceToast(msg);
+    setTimeout(() => setWorkspaceToast(null), 3500);
+  };
 
   // --- 1. 5S Audit State ---
   const [fiveSArea, setFiveSArea] = useState('Line 18 Sewing Floor');
@@ -380,7 +385,7 @@ export const LeanToolWorkspace: React.FC<LeanToolWorkspaceProps> = ({
                   <span>Audit Status: {fiveSPct >= 85 ? 'Grade A - Certified' : 'Requires Corrective Action'}</span>
                 </span>
                 <button
-                  onClick={() => alert(`5S Audit for ${fiveSArea} recorded with score ${fiveSPct}%!`)}
+                  onClick={() => showToast(`5S Audit for ${fiveSArea} recorded with score ${fiveSPct}%!`)}
                   className="px-4 py-2 rounded-xl bg-[#176f78] text-white text-xs font-bold hover:bg-[#12555c] transition-colors"
                 >
                   Save 5S Audit Record
@@ -547,7 +552,7 @@ export const LeanToolWorkspace: React.FC<LeanToolWorkspaceProps> = ({
                       prev.map(w => (w.category === wasteCat ? { ...w, lostMins: w.lostMins + mins } : w))
                     );
                     setWasteNote('');
-                    alert(`Logged ${mins} mins lost under ${wasteCat}!`);
+                    showToast(`Logged ${mins} mins lost under ${wasteCat}!`);
                   }}
                   className="w-full py-2 rounded-xl bg-[#176f78] text-white text-xs font-bold hover:bg-[#12555c] transition-colors"
                 >
@@ -835,7 +840,7 @@ export const LeanToolWorkspace: React.FC<LeanToolWorkspaceProps> = ({
                     { name: '05. Bottom Hem', va: 28, nva: 5, wait: 3 },
                     { name: '06. Label & Tack', va: 24, nva: 4, wait: 4 }
                   ]);
-                  alert('Line operations leveled! Station times rebalanced under Takt.');
+                  showToast('Line operations leveled! Station times rebalanced under Takt.');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-[#176f78] text-white text-xs font-bold"
               >
@@ -1119,7 +1124,7 @@ export const LeanToolWorkspace: React.FC<LeanToolWorkspaceProps> = ({
                 <p className="text-[11px] text-[#527078]">Prevent bundle piles and starvation between processes</p>
               </div>
               <button
-                onClick={() => alert('Replenishment pull signal dispatched to Cutting Store!')}
+                onClick={() => showToast('Replenishment pull signal dispatched to Cutting Store!')}
                 className="px-3 py-1.5 rounded-xl bg-[#176f78] text-white text-xs font-bold"
               >
                 Dispatch Pull Signal
@@ -1392,6 +1397,20 @@ export const LeanToolWorkspace: React.FC<LeanToolWorkspaceProps> = ({
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Floating In-App Toast Notification */}
+      {workspaceToast && (
+        <div className="fixed bottom-20 right-6 z-50 px-4 py-3 rounded-2xl bg-[#17343a] text-white shadow-xl flex items-center gap-2 text-xs border border-white/10 animate-in fade-in slide-in-from-bottom-2">
+          <span>{workspaceToast}</span>
+          <button
+            type="button"
+            onClick={() => setWorkspaceToast(null)}
+            className="ml-2 text-slate-300 hover:text-white cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
       )}
     </div>

@@ -143,7 +143,7 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
 
   const handleDeleteRole = (tierId: string) => {
     if (roleTiers.length <= 1) {
-      alert('At least one role tier must remain in the system.');
+      showToast('At least one role tier must remain in the system.');
       return;
     }
     const target = roleTiers.find(t => t.id === tierId);

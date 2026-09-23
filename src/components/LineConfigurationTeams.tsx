@@ -316,13 +316,13 @@ export const LineConfigurationTeams: React.FC<LineConfigurationTeamsProps> = ({
     e.preventDefault();
     const cleanLineNo = lineNoInput.replace(/line\s*/i, '').trim();
     if (!cleanLineNo) {
-      alert('Please enter a valid line number (e.g. 18 or Line 18).');
+      showNotification('Please enter a valid line number (e.g. 18 or Line 18).');
       return;
     }
 
     // Check duplicate
     if (lines.some(l => l.lineNo === cleanLineNo)) {
-      alert(`Line ${cleanLineNo} already exists in the factory. Please choose another number or edit existing Line ${cleanLineNo}.`);
+      showNotification(`Line ${cleanLineNo} already exists in the factory. Please choose another number or edit existing Line ${cleanLineNo}.`);
       return;
     }
 

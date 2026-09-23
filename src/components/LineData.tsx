@@ -242,7 +242,7 @@ export const LineData: React.FC<LineDataProps> = ({
     e.preventDefault();
     const cleanLineNo = addLineNo.replace(/line\s*/i, '').trim();
     if (!cleanLineNo) {
-      alert('Please provide a valid line number.');
+      showToastNotification('Please provide a valid line number.');
       return;
     }
 
@@ -327,7 +327,7 @@ export const LineData: React.FC<LineDataProps> = ({
 
   const handleRequestDelete = (line: LineEntry) => {
     if (lines.length <= 1) {
-      alert('Cannot delete: Factory requires at least one active sewing line.');
+      showToastNotification('Cannot delete: Factory requires at least one active sewing line.');
       return;
     }
     setLineToDelete(line);
@@ -352,7 +352,7 @@ export const LineData: React.FC<LineDataProps> = ({
   const handleRequestDeleteFloor = (floorName: string) => {
     const trimmed = floorName.trim();
     if (floorList.length <= 1) {
-      alert(`Cannot delete floor "${floorName}": The factory requires at least one active production floor/unit.`);
+      showToastNotification(`Cannot delete floor "${floorName}": The factory requires at least one active production floor/unit.`);
       return;
     }
 

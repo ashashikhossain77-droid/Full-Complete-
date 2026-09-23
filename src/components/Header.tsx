@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Bell, Sun, Moon, Gauge, Award, CheckCircle2, Loader2, Check, ShieldCheck, Sparkles, User, Upload, MessageSquare } from 'lucide-react';
+import { Bell, Sun, Moon, Gauge, Award, CheckCircle2, Loader2, Check, ShieldCheck, Sparkles, User, Upload, MessageSquare, Lock } from 'lucide-react';
 import { SaveStatus, UserProfile, LineEntry } from '../types';
 import { CustomDateSelector } from './CustomDateSelector';
 
@@ -29,6 +29,7 @@ interface HeaderProps {
   onOpenDatabase?: (tab?: 'backup' | 'csv-import') => void;
   lines?: LineEntry[];
   onInitializeDateLines?: (date: string) => void;
+  onLockTerminal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -48,7 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenProfile,
   onOpenDatabase,
   lines = [],
-  onInitializeDateLines
+  onInitializeDateLines,
+  onLockTerminal
 }) => {
   const isDark = theme === 'dark';
 
@@ -236,6 +238,20 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </button>
+
+            {/* Lock Terminal Quick Button */}
+            {onLockTerminal && (
+              <button
+                id="header-lock-terminal-btn"
+                type="button"
+                onClick={onLockTerminal}
+                title="Lock Terminal Workstation"
+                aria-label="Lock Workstation"
+                className="relative w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl border border-[#d9d2c2] bg-white text-slate-700 hover:text-amber-600 hover:border-amber-400 flex items-center justify-center transition-all shadow-2xs cursor-pointer group touch-manipulation active:scale-95 shrink-0"
+              >
+                <Lock className="w-4 h-4 transition-transform group-hover:scale-110" />
+              </button>
+            )}
 
             {/* Theme Toggle Button (Light/Dark Mode with Smooth Cross-Fade) */}
             <button

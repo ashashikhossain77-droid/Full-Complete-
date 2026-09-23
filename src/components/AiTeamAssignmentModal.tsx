@@ -158,7 +158,7 @@ export const AiTeamAssignmentModal: React.FC<AiTeamAssignmentModalProps> = ({
 
     const chosenAssignments = recommendation.suggestedAssignments.filter(a => selectedMemberIds.has(a.memberId));
     if (chosenAssignments.length === 0) {
-      alert('Please select at least one team member to apply.');
+      setErrorMsg('Please select at least one team member to apply.');
       return;
     }
 
